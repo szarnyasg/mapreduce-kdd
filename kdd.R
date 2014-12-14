@@ -103,7 +103,7 @@ a <- studentcountfun(masterdata_nohdr)
 a
 
 
-### determine how much time each student spent with the problems
+### determine how much time each student spent with the problems [seconds]
 studentstime = 
 	function(input, output = NULL, pattern = "\n") {
 		
@@ -111,7 +111,7 @@ studentstime =
 			function(., lines) {
 				df <- read.table(text = lines, sep = "\t", header = FALSE)
 				names(df) <- geomcols
-				keyval(df["Anon.Student.Id"], df["Step.Duration..sec."])
+				keyval(df$Anon.Student.Id, df$Step.Duration..sec.)
 			}
 		
 		st.reduce =
@@ -139,8 +139,7 @@ a
 
 
 
-
-### 
+### MapReduce job for calculating the average "grade for each student"
 studentscorrect = 
 	function(input, output = NULL, pattern = "\n") {
 		
@@ -148,12 +147,12 @@ studentscorrect =
 			function(., lines) {
 				df <- read.table(text = lines, sep = "\t", header = FALSE)
 				names(df) <- geomcols
-				keyval(df["Anon.Student.Id"], df["Correct.First.Attempt"])
+				keyval(df$Anon.Student.Id, df$Correct.First.Attempt)
 			}
 		
 		st.reduce =
 			function(k, vv) {
-				keyval(k, max(vv))
+				keyval(k, mean(vv, na.rm = TRUE))
 			}
 		
 		mapreduce(		
@@ -176,3 +175,45 @@ c
 
 ihist(c$val)
 ihist(a$val)
+
+
+
+### determine how much time each student spent with the problems [seconds]
+studentstime = 
+	function(input, output = NULL, pattern = "\n") {
+		
+		st.map = 
+			function(., lines) {
+				df <- read.table(text = lines, sep = "\t", header = FALSE)
+				names(df) <- geomcols
+				keyval(df["Anon.Student.Id"], df$["Step.Duration..sec."])
+			}
+		
+		st.reduce =
+			function(k, vv) {
+				keyval(k, sum(vv))
+			}
+		
+		mapreduce(		
+			input = input,
+			output = output,
+			input.format = "text",
+			map = st.map,
+			reduce = st.reduce,
+			combine = T)
+	}
+
+studentstimefun = function(file) {
+	a <- studentstime(file)
+	b <- from.dfs(a)
+	b
+}
+
+a <- studentstimefun(masterdata_nohdr)
+a
+
+df <- read.table(file = masterdata, header = TRUE, sep = "\t")
+d <- df$Step.Duration..sec.
+d <- df["Step.Duration..sec."]
+mean(d, na.rm = TRUE)
+
