@@ -18,7 +18,11 @@ smalldata_nohdr <- "algebra_2005_2006/algebra_2005_2006_master_small_no_header.t
 masterdata<- "algebra_2005_2006/algebra_2005_2006_master.txt"
 masterdata_nohdr <- "algebra_2005_2006/algebra_2005_2006_master_no_header.txt"
 
+df <- read.table(file = masterdata, header = TRUE, sep = "\t")
+
+###
 ### MapReduce job for enumerating the students
+###
 studentids = 
 	function(input, output = NULL, pattern = "\n") {
 		
@@ -45,17 +49,9 @@ studentidsfun = function(file) {
 	b
 }
 
-a <- studentidsfun(masterdata_nohdr)
-a
-length(unlist(keys(a)))
-
-#stlist <- studentlistfun(masterdata_nohdr)
-#stlist
-#k <- keys(stlist)
-#k
-#length(unlist(k))
-
-### count the number of students with a 2-phase MapReduce job
+###
+### 2-phase MapReduce job to count the number of students
+###
 studentcount = 
 	function(input, output = NULL, pattern = "\n") {
 		
@@ -102,8 +98,9 @@ studentcountfun = function(file) {
 a <- studentcountfun(masterdata_nohdr)
 a
 
-
-### determine how much time each student spent with the problems [seconds]
+###
+### MapReduce job to determine how much time each student spent with the problems [seconds]
+###
 studentstime = 
 	function(input, output = NULL, pattern = "\n") {
 		
@@ -138,8 +135,9 @@ a <- studentstimefun(masterdata_nohdr)
 a
 
 
-
-### MapReduce job for calculating the average "grade for each student"
+###
+### MapReduce job for calculating the average success rate for each student
+###
 studentscorrect = 
 	function(input, output = NULL, pattern = "\n") {
 		
@@ -173,12 +171,13 @@ studentscorrectfun = function(file) {
 c <- studentscorrectfun(masterdata_nohdr)
 c
 
-ihist(c$val)
-ihist(a$val)
+ihist(c$val, main="x: averga score, y: number of students")
+ihist(a$val, main="x: total time spent [s], y: number of students")
 
 
-
-### determine how much time each student spent with the problems [seconds]
+###
+### MapReduce job to determine the time each student spent with the problems [seconds]
+###
 studentstime = 
 	function(input, output = NULL, pattern = "\n") {
 		
@@ -186,7 +185,7 @@ studentstime =
 			function(., lines) {
 				df <- read.table(text = lines, sep = "\t", header = FALSE)
 				names(df) <- geomcols
-				keyval(df["Anon.Student.Id"], df$["Step.Duration..sec."])
+				keyval(df["Anon.Student.Id"], df["Step.Duration..sec."])
 			}
 		
 		st.reduce =
@@ -211,9 +210,3 @@ studentstimefun = function(file) {
 
 a <- studentstimefun(masterdata_nohdr)
 a
-
-df <- read.table(file = masterdata, header = TRUE, sep = "\t")
-d <- df$Step.Duration..sec.
-d <- df["Step.Duration..sec."]
-mean(d, na.rm = TRUE)
-
