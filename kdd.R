@@ -15,6 +15,8 @@ geomcols <- c('Row', 'Anon.Student.Id', 'Problem.Hierarchy', 'Problem.Name', 'Pr
 smalldata <- "algebra_2005_2006/algebra_2005_2006_master_small.txt"
 smalldata_nohdr <- "algebra_2005_2006/algebra_2005_2006_master_small_no_header.txt"
 
+df <- read.table(file = smalldata, header = TRUE, sep = "\t")
+
 masterdata<- "algebra_2005_2006/algebra_2005_2006_master.txt"
 masterdata_nohdr <- "algebra_2005_2006/algebra_2005_2006_master_no_header.txt"
 
@@ -262,3 +264,42 @@ r1
 r2
 
 cor(r1, r2)
+
+###
+### MapReduce job for counting the mean score for each problem
+###
+problemmeanscore = 
+	function(input, output = NULL, pattern = "\n") {
+		
+		st.map = 
+			function(., lines) {
+				df <- read.table(text = lines, sep = "\t", header = FALSE)
+				names(df) <- geomcols
+				k <- df[,c("Problem.Hierarchy", "Problem.Name")]
+				v <- df$Correct.First.Attempt
+				keyval(k, v)
+			}
+		
+		st.reduce =
+			function(k, vv) {
+				m <- mean(vv, na.rm = T)
+				keyval(k, m)
+			}
+		
+		mapreduce(		
+			input = input,
+			output = output,
+			input.format = "text",
+			map = st.map,
+			reduce = st.reduce,
+			combine = T)
+	}
+
+problemmeanscorefun = function(file) {
+	a <- problemmeanscore(file)
+	b <- from.dfs(a)
+	b
+}
+
+problemscore <- problemmeanscorefun(masterdata_nohdr)
+score
