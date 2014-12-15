@@ -303,3 +303,6 @@ problemmeanscorefun = function(file) {
 
 problemscore <- problemmeanscorefun(masterdata_nohdr)
 score
+
+library(ggplot2)
+ggplot(NULL, aes(x=score$val)) + geom_histogram()
