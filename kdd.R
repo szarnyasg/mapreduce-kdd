@@ -172,6 +172,7 @@ studentscorrectfun = function(file) {
 }
 
 score <- studentscorrectfun(masterdata_nohdr)
+score
 
 ###
 ### MapReduce job to determine the time each student spent with the problems [seconds]
@@ -207,6 +208,7 @@ studentstimefun = function(file) {
 }
 
 time <- studentstimefun(masterdata_nohdr)
+time
 
 ihist(score$val, main="x: average score, y: number of students")
 ihist(time$val, main="x: total time spent [s], y: number of students")
@@ -302,7 +304,27 @@ problemmeanscorefun = function(file) {
 }
 
 problemscore <- problemmeanscorefun(masterdata_nohdr)
-score
+problemscore
 
 library(ggplot2)
-ggplot(NULL, aes(x=score$val)) + geom_histogram()
+ggplot(NULL, aes(x=problemscore$val)) + geom_histogram()
+
+### for batch runs
+
+input <- "/home/szarnyasg/phd/targyak/bigdata/adatok/algebra_2005_2006/algebra_2005_2006_train_no_header.txt"
+
+a <- studentcountfun(input)
+a <- studentstimefun(input)
+score <- studentscorrectfun(input)
+p <- studentsperffun(input)
+
+time <- studentstimefun(input)
+library(iplot)
+ihist(score$val, main="x: average score, y: number of students")
+ihist(time$val, main="x: total time spent [s], y: number of students")
+
+
+#problemscore <- problemmeanscorefun(input)
+system.time(problemscore <- problemmeanscorefun(input))
+library(ggplot2)
+ggplot(NULL, aes(x=problemscore$val)) + geom_histogram()
