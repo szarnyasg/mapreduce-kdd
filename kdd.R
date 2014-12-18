@@ -1,4 +1,6 @@
-setwd("/home/szarnyasg/git/mapreduce-kdd");
+# 1. navigate to your working directory
+# 2. download the data set: http://www.kdd.org/sites/default/files/kddcup/site/2010/files/algebra_2005_2006.zip
+# 3. unzip
 
 # initialization
 # MapReduce
@@ -312,7 +314,6 @@ ggplot(NULL, aes(x=problemscore$val)) + geom_histogram()
 ### for batch runs
 
 input <- "/home/szarnyasg/phd/targyak/bigdata/adatok/algebra_2005_2006/algebra_2005_2006_train_no_header.txt"
-
 a <- studentcountfun(input)
 a <- studentstimefun(input)
 score <- studentscorrectfun(input)
